@@ -1,6 +1,6 @@
 # CoinFlip
 
-- `/` — coin incremental game (in design, see `DESIGN.md`). Redirects to the simulator for now.
+- `/` — Call It, a coin-flip incremental game (see `DESIGN.md`).
 - `/sim/` — coin streak simulator. Original version saved on branch `v1-sim`.
 
 ## Coin streak simulator

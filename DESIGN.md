@@ -1,8 +1,8 @@
-# Coin incremental game — design
+# Call It — design
 
-Working title. A Cookie Clicker-style incremental game built on coin-flip guessing. Lives at the repo root; the streak simulator moves to `/sim/`.
+Working title. A Cookie Clicker-style incremental game built on coin-flip calls. Lives at the repo root; the streak simulator moves to `/sim/`.
 
-Status: draft for review. Numbers below are starting points for balancing, not final values.
+Status: MVP built. Numbers are starting points for balancing.
 
 ---
 
@@ -19,149 +19,114 @@ Status: draft for review. Numbers below are starting points for balancing, not f
 
 ## 2. Core idea
 
-A fair coin can't be beaten by guessing. The only way to win more is to change the coin. The game is built around that: streak-chasing and gut feelings never help; upgrades that bias the coin do. The gambler's fallacy is the lesson, taught through the economy instead of text.
+Call it, flip, get paid. A fair coin can't be beaten by guessing, so every outcome pays something and progress comes from upgrades. No opponents or combat (possible later layer).
 
-## 3. Core loop
+Hit/miss is itself a fair coin, so both outcomes stream and both pay off:
 
-1. Pick H or T.
-2. Flip.
-3. Correct → earn chips × combo multiplier. Wrong → combo resets.
-4. Spend chips on upgrades and helpers.
-5. Helpers guess automatically → chips per second.
-6. Eventually, mint a new coin (prestige) for permanent bonuses and a new coin variant.
-
-### Payout
+- **Hit:** `payout = value × momentum × potential`. Momentum +1. Potential resets.
+- **Miss:** `payout = value × missPay`. Potential +1. Momentum resets.
+- **Coin streaks:** when the coin's own run of identical steps reaches 2+, it pays `value × runBonus × runLength`, regardless of the call.
 
 ```
-payout = basePayout × comboMult × globalMult
-comboMult = 1 + comboStep × combo        (combo = consecutive correct guesses)
+momentum mult  = 1 + momStep × consecutiveHits
+potential mult = 1 + potStep × consecutiveMisses
 ```
 
-Start: `basePayout = 1`, `comboStep = 0.25`. Linear combo keeps a lucky run exciting without breaking the economy. An exponential combo (2^combo) is tempting but makes income mostly luck — rejected for v1.
+A hot streak pays along the way. A cold streak pays all at once when it breaks.
 
-## 4. Coin upgrades (capital)
+Currency: $ only.
 
-The key system. Each one changes the coin's odds, using the same switch-probability model as the simulator (`a` = chance to swap away from H, `b` = from T).
+## 3. Upgrades (MVP)
 
-| Upgrade | Effect | Exploited by |
-|---|---|---|
-| Sticky | Lowers swap chance (step weight). 50% → toward 25% over levels. | Guessing "same as last" |
-| Lean | Biases toward heads (face weight). 50% → toward 70%. | Guessing heads every time |
-| Edge | Small chance the coin lands on edge; any guess pays 10×. | Pure luck bonus |
+| Group | Upgrade | Effect per level | Base cost | Growth |
+|---|---|---|---|---|
+| Call | Value | +$1 base payout | 10 | ×1.55 |
+| Call | Momentum | momStep 0.20 → +0.10 | 25 | ×1.65 |
+| Call | Potential | potStep 0.30 → +0.15 | 25 | ×1.65 |
+| Call | Miss pay | +10% of value on miss (max 90%) | 15 | ×1.6 |
+| Coin | Sticky | swap chance 50% → −3% (max 10 levels) | 100 | ×2.0 |
+| Streaks | Heads / Tails / Swap run | +0.5 × value per run step | 40 | ×1.7 |
+| Auto | Auto call | calls every 4 s, ×0.85 per level | 50 | ×1.8 |
+| Auto | Copy last | auto calls the last face (one-time) | 300 | — |
 
-Design note: Lean alone makes the game trivial ("always tap H"). Sticky requires watching the last flip, so it rewards attention. Lean should be capped low or locked behind a prestige.
+`cost = base × growth^level`. Items appear once lifetime earnings reach half their base cost.
 
-## 5. Helpers (generators)
+Sticky is the only way to beat 50%: calling the last face wins `1 − swap` of the time. Copy last lets the auto caller exploit it.
 
-Helpers guess on their own coins. Each has a rate and a strategy.
+## 4. Later layers
 
-| Helper | Base cost | Flips/sec | Strategy |
-|---|---|---|---|
-| Intern | 15 | 0.5 | Random |
-| Croupier | 100 | 2 | Copies last flip |
-| Bookie | 1,100 | 10 | Copies last flip |
-| Casino | 12,000 | 50 | Best strategy for current coin |
+- **Prestige:** mint a new coin. Reset for a permanent multiplier; each mint offers a coin variant (three-faced, memory coin, paired coins).
+- **Records:** streak and call milestones, each a small permanent bonus (Completion motivation).
+- **Stats tab:** reuse the simulator charts on the player's own calls.
+- **Face bonuses:** heads/tails upgrades tied to the coin's runs, so neither face becomes the dominant call.
 
-```
-cost(n) = baseCost × 1.15^n              (n = number owned)
-chipsPerSec = Σ owned × rate × P(correct | strategy, coin) × payout
-```
+## 5. Balance check (MVP)
 
-`P(correct)` comes from the coin model: random = 50%; copy-last on a coin with swap chance `s` = `1 − s`. So helpers only get better than chance once Sticky is bought. This ties the two systems together.
+Greedy simulation: 1 manual call/s (calling the last face once Sticky is bought) plus auto calls, buying the cheapest item each time.
 
-Joke helper, unlockable: **Gambler** — bets against the current streak. Exactly 50% on a fair coin, worse on a sticky one. Teaches the fallacy without a word.
+| Time | Result |
+|---|---|
+| 0–3 min | A purchase every 5–10 s |
+| 10 min | All items unlocked |
+| 60 min | ~$8.4M lifetime, a purchase every ~2 min |
 
-## 6. Prestige: mint a new coin
+The slowdown near the hour mark is where prestige belongs.
 
-- Requires a lifetime-chip threshold.
-- Grants Mint marks = `floor(sqrt(lifetimeChips / 1e6))`. Each mark = +2% global payout, permanent.
-- Each mint lets the player choose the next coin variant, so runs play differently:
-  - Standard (H/T)
-  - Three-faced (H/T/Edge, larger edge chance)
-  - Loaded pair (two coins flip together; guess the pair)
-  - Memory coin (swap chance depends on the last two flips)
-- Target: first mint around 15–20 minutes of active play (rough target; one indie devlog suggests shorter first loops retain better — weak evidence, to verify by playtesting).
+## 6. UI
 
-## 7. Records (achievements)
+Terse, Mario 1-1 style. No explanatory sentences.
 
-Completion is a top motivator. Records reuse the simulator's step-based streak engine.
+- Top: $ and calls/s.
+- Momentum and Potential chips. Coin. H and T buttons (call = flip). Recent-call strip (faded = miss).
+- Tabs: Call · Upgrades · More. Dot on Upgrades when something is affordable.
 
-- Streaks: heads/tails/swap streaks of 5, 8, 12, 16 steps.
-- Guessing: combo of 5, 10, 15.
-- Economy: chip milestones, helpers owned, mints.
-- Each record: +1% global payout.
-
-## 8. UI
-
-Terse, Mario 1-1 style. No explanatory sentences; numbers and layout do the teaching.
-
-- Top: chips, chips/sec.
-- Center: coin. H and T buttons below it (or tap left/right half of coin — to test).
-- Combo shown as `×1.75` near the coin; flashes on reset.
-- Bottom tabs: Flip · Shop · Mint · Records · Stats.
-- Shop items unlock visually (greyed until affordable at ~50% cost) instead of a tutorial.
-- Stats tab: reuse sim charts for the player's own flips.
-
-## 9. Architecture
+## 7. Architecture
 
 Plain HTML/CSS/JS, no build step, GitHub Pages.
 
 ```
-/                 game
-/sim/             streak simulator (current app)
-/shared/engine.js streak + coin model (extracted from sim/app.js)
+/            game (index.html, game.css, game.js)
+/sim/        streak simulator
 ```
 
-Modules (game):
+MVP is one file (`game.js`) with sections: config/upgrade table, state + save, economy, coin, animation, auto loop, offline, rendering. Split into modules when prestige lands:
 
 | Module | Responsibility |
 |---|---|
-| `engine.js` (shared) | Coin model (`a`, `b`), flip, step/streak tracking, expected values |
-| `state.js` | Game state object, save/load, migration by version number |
-| `economy.js` | Costs, payouts, chips/sec, prestige math |
-| `helpers.js` | Helper ticking; batch resolution at high rates |
-| `records.js` | Achievement checks fed by engine events |
-| `ui.js` | Rendering, tabs, number formatting (1.23e15 / suffixes) |
-| `main.js` | Tick loop, wiring |
+| `engine.js` (shared with sim) | Coin model, flip, step/streak tracking |
+| `state.js` | State, save/load, version migration |
+| `economy.js` | Costs, payouts, prestige math |
+| `auto.js` | Auto-call ticking, bulk resolution at high rates |
+| `ui.js` | Rendering, tabs, number formatting |
 
-Data flow per tick:
+Per tick (50 ms): `auto.tick(dt) → call() → payout → state`. Render every 250 ms. Save every 5 s and on page hide.
 
-```
-rAF(dt) → helpers.tick(dt) → engine flips → economy.credit()
-       → records.check(events) → state.save (every 10 s) → ui.render (throttled)
-```
+Auto calls: animated when slower than 1.2 s; otherwise resolved silently in bulk (cap 5,000 per tick).
 
-High-rate helpers: above ~1,000 flips per tick, resolve in bulk — `correct ≈ Binomial(n, p)` via normal approximation — and skip per-flip streak tracking (streak records come from manual and low-rate flips).
+Save: `localStorage`. Offline: on load, replay the auto caller for the time away (cap 8 h / 200,000 calls).
 
-Save: `localStorage` autosave every 10 s, plus export/import as a text string. Note: unlike the simulator, an incremental game needs saves to work at all.
+## 8. Build phases
 
-Offline progress: on load, `elapsed × chipsPerSec × 0.5`, capped at 8 hours.
+1. **MVP (done):** calls, hit/miss payouts, Momentum, Potential, 10 upgrades, auto call, save, offline.
+2. Records and a stats tab.
+3. Prestige (mint) with 2 coin variants.
+4. Face bonuses, more coin variants, balance pass.
 
-## 10. Build phases
+## 9. Balancing approach
 
-1. **MVP:** manual guessing, combo, Sticky upgrade, 2 helpers, save/load. Playable in one session.
-2. Remaining helpers, Lean/Edge, number formatting, offline progress.
-3. Mint (prestige) with 2 coin variants.
-4. Records.
-5. Stats tab with sim charts; remaining variants.
-
-## 11. Balancing approach
-
-- Node script that simulates a player buying the cheapest-payback item each step; outputs time to each helper and to first mint.
-- Tune `1.15` cost growth, base costs, and mint threshold until the curve hits the pacing targets.
+- Greedy-player simulation in the page (see section 5); extend to report time to each unlock.
+- Tune growth rates and the future mint threshold against pacing targets.
 - Playtest on phone; note where progress stalls.
 
-## 12. Risks and trade-offs
+## 10. Risks and trade-offs
 
-- **Luck feels arbitrary.** Early income depends on guesses at 50%. Mitigation: low combo step, helpers arrive quickly.
-- **Lean trivializes play.** Cap or gate it.
-- **Balancing dominates the work.** Most idle-game devlogs report this. Budget for it.
-- **Big numbers.** Need formatting from the start.
-- **Theme vs lesson.** Casino theme fits the gambler's fallacy but could read as promoting gambling. Alternative: neutral "mint/workshop" theme.
+- **Luck feels arbitrary.** Mitigated by paying both outcomes.
+- **Balancing dominates the work.** Most idle-game devlogs report this.
+- **Late-game manual calls lose relevance** once auto calls are fast. Possible fix: manual calls get a multiplier or feed Momentum for auto calls.
+- **Flat late game** without prestige (see section 5).
 
-## 13. Open questions
+## 11. Open questions
 
-- Currency name (chips? marks? luck?).
-- Theme: casino, mint/workshop, or abstract.
-- Guess input: two buttons vs tapping coin halves.
-- Should manual guessing stay relevant late game (e.g., combo multiplies helper output)?
+- Name: "Call It" is a placeholder.
+- Should manual calls stay relevant late game?
+- Prestige currency and what carries over.
