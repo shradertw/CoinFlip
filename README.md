@@ -1,7 +1,7 @@
 # CoinFlip
 
 - `/` — coin incremental game (in design, see `DESIGN.md`). Redirects to the simulator for now.
-- `/sim/` — coin streak simulator. Original version tagged `v1-sim`.
+- `/sim/` — coin streak simulator. Original version saved on branch `v1-sim`.
 
 ## Coin streak simulator
 
