@@ -22,7 +22,7 @@
         <div class="face t">T</div>
       </div>
     </div>
-    <p id="hint" class="hint">Tap the coin to flip</p>
+    <p id="hint" class="hint"></p>
     <div class="center"><button id="auto" class="pill"><i class="ti ti-player-play"></i> Auto</button></div>
 
     <div class="strips">
@@ -41,7 +41,6 @@
   <!-- Histogram tab -->
   <section id="tab-hist" class="tab">
     <h2>Streak lengths</h2>
-    <p class="sub">How often each streak length shows up. Since every step is a fresh toss, each extra step makes a streak rarer, so a fair coin shows each length about half as often as the one before.</p>
     <div class="seg" id="histSeg"><button data-k="H" class="on">Heads</button><button data-k="T">Tails</button><button data-k="A">Swap</button></div>
     <div class="legend"><span><i id="obsSwatch" class="sw solid"></i>Observed</span><span><i class="sw outline"></i>Expected</span></div>
     <div class="chart"><canvas id="histC"></canvas></div>
@@ -51,7 +50,7 @@
   <!-- Gambler tab -->
   <section id="tab-gambler" class="tab">
     <h2>Gambler's fallacy check</h2>
-    <p class="sub">Tests whether a streak changes what happens next. The coin has no memory, so the chance of a streak continuing should stay the same no matter how long it already is.</p>
+    <p class="sub">The belief that a streak changes the odds of the next flip.</p>
     <p class="sub" id="gExp"></p>
     <div class="gt" id="gt"></div>
   </section>
@@ -59,7 +58,6 @@
   <!-- Trends tab -->
   <section id="tab-trends" class="tab">
     <h2>Longest streaks</h2>
-    <p class="sub">Long streaks feel rare, but with enough flips they're guaranteed. The longest streak grows slowly, about 1 step each time the number of flips doubles.</p>
     <div class="card cg3">
       <span></span><span class="h">Longest</span><span class="h">Expected</span>
       <span>Heads</span><b id="lH">0</b><b id="eH">–</b>
@@ -67,26 +65,24 @@
       <span>Swap</span><b id="lA">0</b><b id="eA">–</b>
     </div>
     <h2>Running averages</h2>
-    <p class="sub">Early averages swing a lot, then settle toward the prediction as flips pile up. This is the law of large numbers.</p>
     <div class="legend"><span><i class="ln solid"></i>Observed</span><span><i class="ln dashed"></i>Expected</span><span><i class="ln vert"></i>Setting change</span></div>
     <div class="chart tall"><canvas id="lineC"></canvas></div>
   </section>
 
   <!-- Settings tab -->
   <section id="tab-settings" class="tab">
-    <h2>How streaks are measured</h2>
-    <p class="sub">Lengths are in steps (R = repeat, C = change). Streaks of 2+ steps are recorded once they end.</p>
+    <h2>Streaks</h2>
+    <p class="sub">Length in steps. R = repeat, C = change. Recorded at 2+.</p>
 
     <h2>Coin weight</h2>
     <div class="seg" id="modeSeg"><button data-m="face" class="on">Face weight</button><button data-m="step">Step weight</button></div>
     <p class="sub" id="modeInfo"></p>
-    <div class="row"><span class="lbl" id="wLabel">Chance of heads</span><input id="weight" type="range" min="1" max="99" step="1" value="50"><span class="out" id="wOut">50%</span></div>
+    <div class="row"><span class="lbl" id="wLabel">Heads</span><input id="weight" type="range" min="1" max="99" step="1" value="50"><span class="out" id="wOut">50%</span></div>
     <p class="sub" id="wOther"></p>
 
     <h2>Timing</h2>
     <div class="row"><span class="lbl">Animation time</span><input id="anim" type="range" min="0" max="2000" step="50" value="600"><span class="out" id="animOut">600 ms</span></div>
     <div class="row"><span class="lbl">Auto speed</span><input id="rate" type="range" min="0" max="100" step="1" value="25"><span class="out" id="rateOut">1/s</span></div>
-    <p class="sub">When auto-flips come faster than the animation, the coin skips the animation and shows the latest result.</p>
 
     <h2>Batch</h2>
     <div class="row"><input id="batchN" type="number" min="1" max="10000000" value="100000"><button id="batchGo">Run now</button></div>
@@ -94,7 +90,6 @@
 
     <h2>Data</h2>
     <div class="row"><button id="export"><i class="ti ti-download"></i> Export CSV</button><button id="reset" class="danger"><i class="ti ti-refresh"></i> Reset stats</button></div>
-    <p class="sub">The export has a summary at the top, then one row per flip (first 1,000,000 flips).</p>
   </section>
 </main>
 

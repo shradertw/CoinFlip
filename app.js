@@ -167,14 +167,13 @@ function startAuto() {
   autoOn = true; acc = 0; lastT = performance.now();
   $('auto').classList.add('running');
   $('auto').innerHTML = '<i class="ti ti-player-pause"></i> Pause';
-  $('hint').textContent = 'Auto-flipping';
   loop();
 }
 function stopAuto() {
   autoOn = false; clearTimeout(autoTimer);
   $('auto').classList.remove('running');
   $('auto').innerHTML = '<i class="ti ti-player-play"></i> Auto';
-  $('hint').textContent = 'Tap the coin to flip';
+  $('hint').textContent = '';
 }
 function loop() {
   if (!autoOn) return;
@@ -275,7 +274,7 @@ function renderHist() {
   const labs = [], ob = [], ex = [];
   for (let j = MIN; j <= top; j++) { labs.push(j); ob.push(L[j] || 0); ex.push(+(n * q[j]).toFixed(1)); }
   let over = 0; for (const j in L) if (+j > top) over += L[j];
-  $('histInfo').textContent = `${n.toLocaleString()} ${NAME[k].toLowerCase()} streaks recorded. Predicted average ${EXP[k].mean.toFixed(2)} steps.` + (over ? ` ${over} longer than ${top} not shown.` : '');
+  $('histInfo').textContent = `${n.toLocaleString()} recorded · expected avg ${EXP[k].mean.toFixed(2)}` + (over ? ` · ${over} over ${top} hidden` : '');
   $('obsSwatch').style.background = COL[k];
   if (!hc) return;
   hc.data.labels = labs;
@@ -287,8 +286,8 @@ function pct(x) { return (100 * x).toFixed(1) + '%'; }
 function renderGambler() {
   const { a, b } = switchProbs();
   $('gExp').textContent = cfg.mode === 'step'
-    ? `Expected with the current coin: heads and tails continue ${pct(1 - cfg.pChange)}, swaps continue ${pct(cfg.pChange)}, at every length.`
-    : `Expected with the current coin: heads continue ${pct(1 - a)}, tails continue ${pct(1 - b)}. Swaps alternate between ${pct(a)} and ${pct(b)} depending on which face they're on.`;
+    ? `Expected: Heads ${pct(1 - cfg.pChange)} · Tails ${pct(1 - cfg.pChange)} · Swap ${pct(cfg.pChange)}`
+    : `Expected: Heads ${pct(1 - a)} · Tails ${pct(1 - b)} · Swap ${a === b ? pct(a) : pct(a) + ' / ' + pct(b)}`;
   const rows = Math.max(S.g.H.length, S.g.T.length, S.g.A.length) - 1;
   const cell = (o) => o ? `${pct(o.r / o.n)}<small>${o.n.toLocaleString()} sample${o.n === 1 ? '' : 's'}</small>` : '–';
   let h = '<span class="h">Length</span><span class="h">Heads</span><span class="h">Tails</span><span class="h">Swap</span>';
@@ -355,12 +354,10 @@ function syncWeightUI() {
   document.querySelectorAll('#modeSeg button').forEach((b) => b.classList.toggle('on', b.dataset.m === cfg.mode));
   const v = Math.round((face ? cfg.pHeads : cfg.pChange) * 100);
   $('weight').value = v;
-  $('wLabel').textContent = face ? 'Chance of heads' : 'Chance of swap';
+  $('wLabel').textContent = face ? 'Heads' : 'Swap';
   $('wOut').textContent = v + '%';
-  $('wOther').textContent = face ? `Chance of tails: ${100 - v}%` : `Chance of repeat: ${100 - v}%. Heads and tails still come up equally often over time.`;
-  $('modeInfo').textContent = face
-    ? 'Each flip rolls heads or tails on its own. Weighting it makes one face streak longer than the other.'
-    : 'Each flip rolls "swap or stay" from the current face. Weighting it makes the coin sticky (low) or jumpy (high).';
+  $('wOther').textContent = face ? `Tails ${100 - v}%` : `Stay ${100 - v}%`;
+  $('modeInfo').textContent = face ? 'Each flip rolls a face.' : 'Each flip rolls swap or stay.';
 }
 function settingsChanged() {
   computeExpected();
@@ -376,7 +373,7 @@ function setTab(t) {
   renderNow();
 }
 function tapCoin() {
-  if (autoOn) { $('hint').textContent = 'Pause auto to flip by hand'; return; }
+  if (autoOn) { $('hint').textContent = 'Auto on'; return; }
   animatedFlip();
 }
 
@@ -405,7 +402,7 @@ $('rate').addEventListener('input', () => { cfg.rate = rateFromSlider(+$('rate')
 $('batchN').addEventListener('input', () => { $('batchErr').textContent = ''; });
 $('batchGo').addEventListener('click', () => {
   const v = parseInt($('batchN').value, 10);
-  if (!(v >= 1 && v <= 10000000)) { $('batchErr').textContent = 'Enter a number from 1 to 10,000,000.'; return; }
+  if (!(v >= 1 && v <= 10000000)) { $('batchErr').textContent = '1 to 10,000,000'; return; }
   stopAuto();
   for (let i = 0; i < v; i++) flip();
   showFace(S.prev, false);
@@ -413,7 +410,7 @@ $('batchGo').addEventListener('click', () => {
   render();
 });
 $('reset').addEventListener('click', () => {
-  if (S.n === 0 || confirm('Reset all stats? Export first if you want to keep them.')) resetAll();
+  if (S.n === 0 || confirm('Reset stats?')) resetAll();
 });
 $('export').addEventListener('click', exportCSV);
 
