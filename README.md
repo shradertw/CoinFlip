@@ -1,4 +1,9 @@
-# Coin streak simulator
+# CoinFlip
+
+- `/` — coin incremental game (in design, see `DESIGN.md`). Redirects to the simulator for now.
+- `/sim/` — coin streak simulator. Original version tagged `v1-sim`.
+
+## Coin streak simulator
 
 A small web app for watching streaks form in coin flips.
 
@@ -27,4 +32,4 @@ Settings can change mid-run. Stats start fresh each time the page loads; use **E
 
 ## Running it
 
-Open `index.html` in a browser, or enable GitHub Pages for this repo (Settings → Pages → deploy from the `main` branch, root folder). Chart.js and the icon font load from jsDelivr, so the charts need an internet connection.
+Open `sim/index.html` in a browser, or enable GitHub Pages for this repo (Settings → Pages → deploy from the `main` branch, root folder). Chart.js and the icon font load from jsDelivr, so the charts need an internet connection.

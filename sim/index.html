@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coin streak simulator</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <span class="title">Coin streaks</span>
+  <span class="flips"><span id="count">0</span> flips</span>
+</header>
+
+<main>
+  <!-- Coin tab -->
+  <section id="tab-coin" class="tab active">
+    <div class="coin-wrap">
+      <div id="coin" class="coin" role="button" tabindex="0" aria-label="Flip the coin">
+        <div class="face h">H</div>
+        <div class="face t">T</div>
+      </div>
+    </div>
+    <p id="hint" class="hint"></p>
+    <div class="center"><button id="auto" class="pill"><i class="ti ti-player-play"></i> Auto</button></div>
+
+    <div class="strips">
+      <div id="strip" class="strip"></div>
+      <div id="steps" class="steps"></div>
+    </div>
+
+    <div class="card"><p class="ct"><span class="dot" style="background:#1D9E75"></span>Heads</p>
+      <div class="cg"><span>Average<b id="hA">–</b></span><span>Recorded<b id="hN">0</b></span><span>Longest<b id="hM">0</b></span><span>Current<b id="hC">0</b></span></div></div>
+    <div class="card"><p class="ct"><span class="dot" style="background:#D85A30"></span>Tails</p>
+      <div class="cg"><span>Average<b id="tA">–</b></span><span>Recorded<b id="tN">0</b></span><span>Longest<b id="tM">0</b></span><span>Current<b id="tC">0</b></span></div></div>
+    <div class="card"><p class="ct"><span class="dot" style="background:#7F77DD"></span>Swap</p>
+      <div class="cg"><span>Average<b id="aA">–</b></span><span>Recorded<b id="aN">0</b></span><span>Longest<b id="aM">0</b></span><span>Current<b id="aC">0</b></span></div></div>
+  </section>
+
+  <!-- Histogram tab -->
+  <section id="tab-hist" class="tab">
+    <h2>Streak lengths</h2>
+    <div class="seg" id="histSeg"><button data-k="H" class="on">Heads</button><button data-k="T">Tails</button><button data-k="A">Swap</button></div>
+    <div class="legend"><span><i id="obsSwatch" class="sw solid"></i>Observed</span><span><i class="sw outline"></i>Expected</span></div>
+    <div class="chart"><canvas id="histC"></canvas></div>
+    <p class="sub" id="histInfo"></p>
+  </section>
+
+  <!-- Gambler tab -->
+  <section id="tab-gambler" class="tab">
+    <h2>Gambler's fallacy check</h2>
+    <p class="sub">The belief that a streak changes the odds of the next flip.</p>
+    <p class="sub" id="gExp"></p>
+    <div class="gt" id="gt"></div>
+  </section>
+
+  <!-- Trends tab -->
+  <section id="tab-trends" class="tab">
+    <h2>Longest streaks</h2>
+    <div class="card cg3">
+      <span></span><span class="h">Longest</span><span class="h">Expected</span>
+      <span>Heads</span><b id="lH">0</b><b id="eH">–</b>
+      <span>Tails</span><b id="lT">0</b><b id="eT">–</b>
+      <span>Swap</span><b id="lA">0</b><b id="eA">–</b>
+    </div>
+    <h2>Running averages</h2>
+    <div class="legend"><span><i class="ln solid"></i>Observed</span><span><i class="ln dashed"></i>Expected</span><span><i class="ln vert"></i>Setting change</span></div>
+    <div class="chart tall"><canvas id="lineC"></canvas></div>
+  </section>
+
+  <!-- Settings tab -->
+  <section id="tab-settings" class="tab">
+    <h2>Streaks</h2>
+    <p class="sub">Length in steps. R = repeat, C = change. Recorded at 2+.</p>
+
+    <h2>Coin weight</h2>
+    <div class="seg" id="modeSeg"><button data-m="face" class="on">Face weight</button><button data-m="step">Step weight</button></div>
+    <p class="sub" id="modeInfo"></p>
+    <div class="row"><span class="lbl" id="wLabel">Heads</span><input id="weight" type="range" min="1" max="99" step="1" value="50"><span class="out" id="wOut">50%</span></div>
+    <p class="sub" id="wOther"></p>
+
+    <h2>Timing</h2>
+    <div class="row"><span class="lbl">Animation time</span><input id="anim" type="range" min="0" max="2000" step="50" value="600"><span class="out" id="animOut">600 ms</span></div>
+    <div class="row"><span class="lbl">Auto speed</span><input id="rate" type="range" min="0" max="100" step="1" value="25"><span class="out" id="rateOut">1/s</span></div>
+
+    <h2>Batch</h2>
+    <div class="row"><input id="batchN" type="number" min="1" max="10000000" value="100000"><button id="batchGo">Run now</button></div>
+    <p class="err" id="batchErr"></p>
+
+    <h2>Data</h2>
+    <div class="row"><button id="export"><i class="ti ti-download"></i> Export CSV</button><button id="reset" class="danger"><i class="ti ti-refresh"></i> Reset stats</button></div>
+  </section>
+</main>
+
+<nav>
+  <button data-tab="coin" class="on"><i class="ti ti-coin"></i><span>Coin</span></button>
+  <button data-tab="hist"><i class="ti ti-chart-bar"></i><span>Lengths</span></button>
+  <button data-tab="gambler"><i class="ti ti-dice-5"></i><span>Gambler</span></button>
+  <button data-tab="trends"><i class="ti ti-chart-line"></i><span>Trends</span></button>
+  <button data-tab="settings"><i class="ti ti-settings"></i><span>Settings</span></button>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
