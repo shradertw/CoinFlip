@@ -30,20 +30,20 @@
       <div id="steps" class="steps"></div>
     </div>
 
-    <div class="card"><p class="ct"><span class="dot" style="background:#1D9E75"></span>Heads repeat streaks (HHH = 2)</p>
+    <div class="card"><p class="ct"><span class="dot" style="background:#1D9E75"></span>Heads</p>
       <div class="cg"><span>Average<b id="hA">–</b></span><span>Recorded<b id="hN">0</b></span><span>Longest<b id="hM">0</b></span><span>Current<b id="hC">0</b></span></div></div>
-    <div class="card"><p class="ct"><span class="dot" style="background:#D85A30"></span>Tails repeat streaks (TTT = 2)</p>
+    <div class="card"><p class="ct"><span class="dot" style="background:#D85A30"></span>Tails</p>
       <div class="cg"><span>Average<b id="tA">–</b></span><span>Recorded<b id="tN">0</b></span><span>Longest<b id="tM">0</b></span><span>Current<b id="tC">0</b></span></div></div>
-    <div class="card"><p class="ct"><span class="dot" style="background:#7F77DD"></span>Change streaks (HTH = 2)</p>
+    <div class="card"><p class="ct"><span class="dot" style="background:#7F77DD"></span>Swap</p>
       <div class="cg"><span>Average<b id="aA">–</b></span><span>Recorded<b id="aN">0</b></span><span>Longest<b id="aM">0</b></span><span>Current<b id="aC">0</b></span></div></div>
-    <p class="note">Lengths are in steps (R = repeat, C = change). Streaks of 2+ steps are recorded once they end.</p>
   </section>
 
   <!-- Histogram tab -->
   <section id="tab-hist" class="tab">
     <h2>Streak lengths</h2>
-    <p class="sub">Solid bars are observed. Outlines are what the current coin settings predict.</p>
-    <div class="seg" id="histSeg"><button data-k="H" class="on">Heads</button><button data-k="T">Tails</button><button data-k="A">Change</button></div>
+    <p class="sub">How often each streak length shows up. Since every step is a fresh toss, each extra step makes a streak rarer, so a fair coin shows each length about half as often as the one before.</p>
+    <div class="seg" id="histSeg"><button data-k="H" class="on">Heads</button><button data-k="T">Tails</button><button data-k="A">Swap</button></div>
+    <div class="legend"><span><i id="obsSwatch" class="sw solid"></i>Observed</span><span><i class="sw outline"></i>Expected</span></div>
     <div class="chart"><canvas id="histC"></canvas></div>
     <p class="sub" id="histInfo"></p>
   </section>
@@ -51,7 +51,7 @@
   <!-- Gambler tab -->
   <section id="tab-gambler" class="tab">
     <h2>Gambler's fallacy check</h2>
-    <p class="sub">After k identical steps in a row, how often is the next step the same again? Rows appear as longer runs happen.</p>
+    <p class="sub">Tests whether a streak changes what happens next. The coin has no memory, so the chance of a streak continuing should stay the same no matter how long it already is.</p>
     <p class="sub" id="gExp"></p>
     <div class="gt" id="gt"></div>
   </section>
@@ -59,20 +59,24 @@
   <!-- Trends tab -->
   <section id="tab-trends" class="tab">
     <h2>Longest streaks</h2>
-    <p class="sub">Estimates are rough and use the current settings. Real results often land 1 to 2 away.</p>
+    <p class="sub">Long streaks feel rare, but with enough flips they're guaranteed. The longest streak grows slowly, about 1 step each time the number of flips doubles.</p>
     <div class="card cg3">
       <span></span><span class="h">Longest</span><span class="h">Expected</span>
       <span>Heads</span><b id="lH">0</b><b id="eH">–</b>
       <span>Tails</span><b id="lT">0</b><b id="eT">–</b>
-      <span>Change</span><b id="lA">0</b><b id="eA">–</b>
+      <span>Swap</span><b id="lA">0</b><b id="eA">–</b>
     </div>
     <h2>Running averages</h2>
-    <p class="sub">Solid lines are observed averages. Dashed lines are predictions for the settings in use at that point. Dotted vertical lines mark setting changes.</p>
+    <p class="sub">Early averages swing a lot, then settle toward the prediction as flips pile up. This is the law of large numbers.</p>
+    <div class="legend"><span><i class="ln solid"></i>Observed</span><span><i class="ln dashed"></i>Expected</span><span><i class="ln vert"></i>Setting change</span></div>
     <div class="chart tall"><canvas id="lineC"></canvas></div>
   </section>
 
   <!-- Settings tab -->
   <section id="tab-settings" class="tab">
+    <h2>How streaks are measured</h2>
+    <p class="sub">Lengths are in steps (R = repeat, C = change). Streaks of 2+ steps are recorded once they end.</p>
+
     <h2>Coin weight</h2>
     <div class="seg" id="modeSeg"><button data-m="face" class="on">Face weight</button><button data-m="step">Step weight</button></div>
     <p class="sub" id="modeInfo"></p>

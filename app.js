@@ -5,7 +5,7 @@ const MIN = 2;                 // a streak is recorded at 2+ identical steps
 const LOG_CAP = 1000000;       // per-flip rows kept for export
 const KMAX = 3000;             // length cap for expected-distribution math
 const COL = { H: '#1D9E75', T: '#D85A30', A: '#7F77DD' };
-const NAME = { H: 'Heads', T: 'Tails', A: 'Change' };
+const NAME = { H: 'Heads', T: 'Tails', A: 'Swap' };
 const $ = (id) => document.getElementById(id);
 
 // ---------- Settings ----------
@@ -276,6 +276,7 @@ function renderHist() {
   for (let j = MIN; j <= top; j++) { labs.push(j); ob.push(L[j] || 0); ex.push(+(n * q[j]).toFixed(1)); }
   let over = 0; for (const j in L) if (+j > top) over += L[j];
   $('histInfo').textContent = `${n.toLocaleString()} ${NAME[k].toLowerCase()} streaks recorded. Predicted average ${EXP[k].mean.toFixed(2)} steps.` + (over ? ` ${over} longer than ${top} not shown.` : '');
+  $('obsSwatch').style.background = COL[k];
   if (!hc) return;
   hc.data.labels = labs;
   hc.data.datasets[0].data = ob; hc.data.datasets[0].backgroundColor = COL[k];
@@ -286,11 +287,11 @@ function pct(x) { return (100 * x).toFixed(1) + '%'; }
 function renderGambler() {
   const { a, b } = switchProbs();
   $('gExp').textContent = cfg.mode === 'step'
-    ? `Current coin predicts: repeats continue ${pct(1 - cfg.pChange)}, changes continue ${pct(cfg.pChange)}, at every k.`
-    : `Current coin predicts: heads repeats continue ${pct(1 - a)}, tails repeats ${pct(1 - b)}. Change runs alternate between ${pct(a)} and ${pct(b)} depending on which face they're on.`;
+    ? `Expected with the current coin: heads and tails continue ${pct(1 - cfg.pChange)}, swaps continue ${pct(cfg.pChange)}, at every length.`
+    : `Expected with the current coin: heads continue ${pct(1 - a)}, tails continue ${pct(1 - b)}. Swaps alternate between ${pct(a)} and ${pct(b)} depending on which face they're on.`;
   const rows = Math.max(S.g.H.length, S.g.T.length, S.g.A.length) - 1;
-  const cell = (o) => o ? `${pct(o.r / o.n)}<small>${o.n.toLocaleString()} samples</small>` : '–';
-  let h = '<span class="h">k</span><span class="h">Heads repeat</span><span class="h">Tails repeat</span><span class="h">Change</span>';
+  const cell = (o) => o ? `${pct(o.r / o.n)}<small>${o.n.toLocaleString()} sample${o.n === 1 ? '' : 's'}</small>` : '–';
+  let h = '<span class="h">Length</span><span class="h">Heads</span><span class="h">Tails</span><span class="h">Swap</span>';
   for (let k = 1; k <= rows; k++) h += `<span>${k}</span><span>${cell(S.g.H[k])}</span><span>${cell(S.g.T[k])}</span><span>${cell(S.g.A[k])}</span>`;
   if (rows < 1) h += '<span>–</span><span>–</span><span>–</span><span>–</span>';
   $('gt').innerHTML = h;
@@ -327,7 +328,7 @@ function exportCSV() {
     out.push(`# ${NAME[k]} streaks,recorded,${s.n},average,${s.n ? (s.sum / s.n).toFixed(4) : ''},longest,${s.max}\n`);
   }
   out.push('# settings history (flip where it started, mode, value)\n');
-  for (const e of S.settings) out.push(`# from flip ${e.at + 1},${e.mode === 'face' ? 'face weight: chance of heads' : 'step weight: chance of change'},${e.value}\n`);
+  for (const e of S.settings) out.push(`# from flip ${e.at + 1},${e.mode === 'face' ? 'face weight: chance of heads' : 'step weight: chance of swap'},${e.value}\n`);
   if (S.n > LOG_CAP) out.push(`# per-flip rows below cover the first ${LOG_CAP} flips only\n`);
   out.push('flip,face,step,mode,weight\n');
   const rows = Math.min(S.n, LOG_CAP);
@@ -354,12 +355,12 @@ function syncWeightUI() {
   document.querySelectorAll('#modeSeg button').forEach((b) => b.classList.toggle('on', b.dataset.m === cfg.mode));
   const v = Math.round((face ? cfg.pHeads : cfg.pChange) * 100);
   $('weight').value = v;
-  $('wLabel').textContent = face ? 'Chance of heads' : 'Chance of change';
+  $('wLabel').textContent = face ? 'Chance of heads' : 'Chance of swap';
   $('wOut').textContent = v + '%';
   $('wOther').textContent = face ? `Chance of tails: ${100 - v}%` : `Chance of repeat: ${100 - v}%. Heads and tails still come up equally often over time.`;
   $('modeInfo').textContent = face
     ? 'Each flip rolls heads or tails on its own. Weighting it makes one face streak longer than the other.'
-    : 'Each flip rolls "switch or stay" from the current face. Weighting it makes the coin sticky (low) or jumpy (high).';
+    : 'Each flip rolls "swap or stay" from the current face. Weighting it makes the coin sticky (low) or jumpy (high).';
 }
 function settingsChanged() {
   computeExpected();

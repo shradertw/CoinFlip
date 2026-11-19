@@ -6,7 +6,7 @@ Tap the coin to flip it, or turn on auto-flip. Every flip is converted into a st
 
 - **Heads repeat streak:** HHH = 2 steps
 - **Tails repeat streak:** TTT = 2 steps
-- **Change streak:** HTH or THT = 2 steps
+- **Swap streak:** HTH or THT = 2 steps
 
 Streaks are recorded once they end, if they reached 2 or more steps.
 
@@ -21,7 +21,7 @@ Streaks are recorded once they end, if they reached 2 or more steps.
 ## Coin weight modes
 
 - **Face weight:** each flip is an independent roll with a set chance of heads.
-- **Step weight:** each flip rolls "switch or stay" from the current face with a set chance of change. Heads and tails stay 50/50 over time, but streak lengths change.
+- **Step weight:** each flip rolls "swap or stay" from the current face with a set chance of swap. Heads and tails stay 50/50 over time, but streak lengths change.
 
 Settings can change mid-run. Stats start fresh each time the page loads; use **Export CSV** to keep a run.
 
