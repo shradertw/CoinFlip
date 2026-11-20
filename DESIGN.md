@@ -85,25 +85,20 @@ Terse, Mario 1-1 style. No explanatory sentences.
 Plain HTML/CSS/JS, no build step, GitHub Pages.
 
 ```
-/            game (index.html, game.css, game.js)
-/sim/        streak simulator
+/                index.html, game.css
+/core.js         rules, state, economy, seeded RNG — no DOM; exposed as window.game
+/game.js         UI: rendering, animation, auto loop, save/load, offline
+/tools/bots.mjs  strategy bots → pacing report (tools/report.md)
+/sim/            streak simulator
 ```
 
-MVP is one file (`game.js`) with sections: config/upgrade table, state + save, economy, coin, animation, auto loop, offline, rendering. Split into modules when prestige lands:
-
-| Module | Responsibility |
-|---|---|
-| `engine.js` (shared with sim) | Coin model, flip, step/streak tracking |
-| `state.js` | State, save/load, version migration |
-| `economy.js` | Costs, payouts, prestige math |
-| `auto.js` | Auto-call ticking, bulk resolution at high rates |
-| `ui.js` | Rendering, tabs, number formatting |
-
-Per tick (50 ms): `auto.tick(dt) → call() → payout → state`. Render every 250 ms. Save every 5 s and on page hide.
+Per tick (50 ms): `auto tick → game.call() → state`. Render every 250 ms. Save every 5 s and on page hide.
 
 Auto calls: animated when slower than 1.2 s; otherwise resolved silently in bulk (cap 5,000 per tick).
 
-Save: `localStorage`. Offline: on load, replay the auto caller for the time away (cap 8 h / 200,000 calls).
+Save: `localStorage`. Offline: on load, replay the auto caller for the time away (cap 8 h / 200,000 calls). Seeded runs (`?seed=`) skip saving.
+
+Possible later split: shared `engine.js` with the simulator.
 
 ## 8. Build phases
 
@@ -114,7 +109,7 @@ Save: `localStorage`. Offline: on load, replay the auto caller for the time away
 
 ## 9. Balancing approach
 
-- Greedy-player simulation in the page (see section 5); extend to report time to each unlock.
+- `tools/bots.mjs`: random, copy-last, idle, and manual-only strategies; reports lifetime at checkpoints, unlock times, late-game buy rate, manual share of income.
 - Tune growth rates and the future mint threshold against pacing targets.
 - Playtest on phone; note where progress stalls.
 

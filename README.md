@@ -33,3 +33,23 @@ Settings can change mid-run. Stats start fresh each time the page loads; use **E
 ## Running it
 
 Open `sim/index.html` in a browser, or enable GitHub Pages for this repo (Settings → Pages → deploy from the `main` branch, root folder). Chart.js and the icon font load from jsDelivr, so the charts need an internet connection.
+
+## Development
+
+Game rules live in `core.js` (no DOM); `game.js` is the UI.
+
+**Dev API** — in the browser console, `window.game`:
+
+| | |
+|---|---|
+| `game.call('H')` | One call, instant. Returns `{ face, hit, gain, callGain, runGain }` |
+| `game.buy('mom')` | Buy an upgrade by id. Returns `true` if bought |
+| `game.state` | Current state |
+| `game.reset()` | Fresh state |
+| `game.seed(n)` | Repeatable randomness (`game.seed(null)` to undo) |
+| `game.UPG` | Upgrade table |
+| `game.ui.render()` | Redraw after scripted changes |
+
+**Seeded runs** — `?seed=123` in the URL starts a fresh, repeatable game that never touches your real save.
+
+**Bots** — `node tools/bots.mjs [--minutes=60] [--seeds=5] [--rate=1]` plays the core under several strategies and prints a pacing report. Latest: `tools/report.md`.
